@@ -1,0 +1,13 @@
+const MIN_QUALITY = 0;
+const MAX_QUALITY = 50;
+
+const DEFAULT_DEGRADE_RATE = 1;
+
+const LOWEST_THRESHOLD = -999999
+
+module.exports = {
+    MIN_QUALITY,
+    MAX_QUALITY,
+    DEFAULT_DEGRADE_RATE,
+    LOWEST_THRESHOLD
+  }

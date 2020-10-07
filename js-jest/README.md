@@ -1,6 +1,6 @@
 # Gilded Rose
 
-This is the Gilded Rose kata in JavaScript with Jest
+This is the Gilded Rose kata SOLVED in JavaScript with Jest by Ben Van Raemdonck
 
 ## Getting started
 

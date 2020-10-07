@@ -1,3 +1,6 @@
+const { MIN_QUALITY, MAX_QUALITY, DEFAULT_DEGRADE_RATE } = require('./constants');
+const { findFilter, findFilterDegradeRate, PASSES_FILTER } = require('./filters');
+
 class Item {
   constructor(name, sellIn, quality){
     this.name = name;
@@ -10,54 +13,27 @@ class Shop {
   constructor(items=[]){
     this.items = items;
   }
-  updateQuality() {
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i].name != 'Aged Brie' && this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-        if (this.items[i].quality > 0) {
-          if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-            this.items[i].quality = this.items[i].quality - 1;
-          }
-        }
-      } else {
-        if (this.items[i].quality < 50) {
-          this.items[i].quality = this.items[i].quality + 1;
-          if (this.items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
-            if (this.items[i].sellIn < 11) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-            if (this.items[i].sellIn < 6) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-          }
-        }
-      }
-      if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-        this.items[i].sellIn = this.items[i].sellIn - 1;
-      }
-      if (this.items[i].sellIn < 0) {
-        if (this.items[i].name != 'Aged Brie') {
-          if (this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-            if (this.items[i].quality > 0) {
-              if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                this.items[i].quality = this.items[i].quality - 1;
-              }
-            }
-          } else {
-            this.items[i].quality = this.items[i].quality - this.items[i].quality;
-          }
-        } else {
-          if (this.items[i].quality < 50) {
-            this.items[i].quality = this.items[i].quality + 1;
-          }
-        }
-      }
-    }
 
-    return this.items;
+
+  updateQuality() {
+    return this.items.map((item) => {
+      const filter = findFilter(item);
+      let qualityDegradeRate = filter ? findFilterDegradeRate(filter, item) : DEFAULT_DEGRADE_RATE;
+      
+      if (!filter && item.sellIn < 0) qualityDegradeRate = DEFAULT_DEGRADE_RATE * 2;
+
+      // Update item quality and subtract sellIn days
+      const newItemQuality = item.quality - qualityDegradeRate;
+      if ((newItemQuality > MIN_QUALITY) && (newItemQuality < MAX_QUALITY)) item.quality = newItemQuality;
+
+      item.sellIn = item.sellIn - 1;
+
+      // A backstage pass quality is 0 when concert is over
+      // TODO: revise if this mechanic occurs more in next features and change or leave implementation (and delete todo)
+      if (filter && filter.name == PASSES_FILTER.name && item.sellIn < 0) item.quality = 0;
+       
+      return item;
+    })
   }
 }
 
